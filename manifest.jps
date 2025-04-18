@@ -1,0 +1,21 @@
+type: install
+name: ERPNext via Docker Compose
+id: erpnext-docker
+logo: https://frappe.io/files/erp-icon.svg
+description: |
+  Deploy ERPNext using Docker Compose on Virtuozzo PaaS.
+
+nodes:
+  - nodeType: dockerengine
+    count: 1
+    cloudlets: 16
+    nodeGroup: cp
+    volumes:
+      - /var/lib/docker
+    env:
+      JELASTIC_EXPOSE: 8080
+    onInstall:
+      - cmd[cp]: |
+          mkdir -p /root/erpnext && cd /root/erpnext
+          curl -O https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml
+          docker compose -f compose.yaml up -d
