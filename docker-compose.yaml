@@ -8,28 +8,20 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - mariadb_data:/var/lib/mysql
-    networks:
-      - erpnext-net
 
   redis-cache:
     image: redis:6.2-alpine
     restart: always
-    networks:
-      - erpnext-net
 
   redis-queue:
     image: redis:6.2-alpine
     restart: always
-    networks:
-      - erpnext-net
 
   redis-socketio:
     image: redis:6.2-alpine
     restart: always
-    networks:
-      - erpnext-net
 
-  frappe:
+  backend:
     image: frappe/frappe:version-15
     restart: always
     depends_on:
@@ -45,80 +37,31 @@ services:
       INSTALL_APPS: erpnext
     volumes:
       - sites:/home/frappe/frappe-bench/sites
-    networks:
-      erpnext-net:
-        aliases:
-          - frappe
-          - backend
 
   site-creator:
     image: frappe/frappe:version-15
     restart: "no"
+    depends_on:
+      - backend
     command: >
       bash -c "
         bench new-site erp.mysite.local --admin-password admin --mariadb-root-password root &&
         bench --site erp.mysite.local install-app erpnext &&
         echo 'site created'
       "
-    depends_on:
-      - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - erpnext-net
 
-  frontend:
-    image: frappe/frappe:version-15
-    command: nginx-entrypoint.sh
+  nginx:
+    image: nginx:1.22-alpine
+    restart: always
     ports:
-      - "80:8080"
-    restart: always
-    depends_on:
-      - frappe
+      - "80:80"
     volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - erpnext-net
-    extra_hosts:
-      - "frappe:127.0.0.1"
-
-  worker:
-    image: frappe/frappe:version-15
-    command: bench worker
-    restart: always
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - frappe
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - erpnext-net
-
-  scheduler:
-    image: frappe/frappe:version-15
-    command: bench schedule
-    restart: always
-    depends_on:
-      - frappe
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - erpnext-net
-
-  websocket:
-    image: frappe/frappe:version-15
-    command: node /home/frappe/frappe-bench/apps/frappe/socketio.js
-    restart: always
-    depends_on:
-      - frappe
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - erpnext-net
+      - backend
 
 volumes:
   mariadb_data:
   sites:
-
-networks:
-  erpnext-net:
-    driver: bridge
