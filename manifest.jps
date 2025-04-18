@@ -10,12 +10,14 @@ nodes:
     count: 1
     cloudlets: 16
     nodeGroup: cp
-    volumes:
-      - /var/lib/docker
     env:
       JELASTIC_EXPOSE: 8080
+    volumes:
+      - /var/lib/docker
     onInstall:
       - cmd[cp]: |
-          mkdir -p /root/erpnext && cd /root/erpnext
-          curl -O https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml
-          docker compose -f compose.yaml up -d
+          bash -c "
+            mkdir -p /root/erpnext && cd /root/erpnext && \
+            curl -sSL -o compose.yaml https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml && \
+            docker compose -f compose.yaml up -d
+          "
