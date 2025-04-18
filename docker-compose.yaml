@@ -1,0 +1,94 @@
+version: '3.7'
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: always
+
+  redis-queue:
+    image: redis:6.2-alpine
+    restart: always
+
+  redis-socketio:
+    image: redis:6.2-alpine
+    restart: always
+
+  backend:
+    image: frappe/erpnext:version-15
+    restart: always
+    depends_on:
+      - mariadb
+      - redis-cache
+      - redis-queue
+      - redis-socketio
+    environment:
+      SITE_NAME: erp.mysite.local
+      DB_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      ADMIN_PASSWORD: admin
+      INSTALL_APPS: erpnext
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  frontend:
+    image: frappe/erpnext:version-15
+    command: nginx-entrypoint.sh
+    ports:
+      - "80:8080"
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  worker:
+    image: frappe/erpnext:version-15
+    command: bench worker
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  scheduler:
+    image: frappe/erpnext:version-15
+    command: bench schedule
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  websocket:
+    image: frappe/erpnext:version-15
+    command: node /home/frappe/frappe-bench/apps/frappe/socketio.js
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  site-creator:
+    image: frappe/erpnext:version-15
+    restart: "no"
+    command: >
+      bash -c "
+        bench new-site erp.mysite.local --admin-password admin --mariadb-root-password root &&
+        bench --site erp.mysite.local install-app erpnext
+      "
+    depends_on:
+      - backend
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+volumes:
+  mariadb_data:
+  sites:
