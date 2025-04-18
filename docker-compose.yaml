@@ -8,18 +8,26 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - mariadb_data:/var/lib/mysql
+    networks:
+      - default
 
   redis-cache:
     image: redis:6.2-alpine
     restart: always
+    networks:
+      - default
 
   redis-queue:
     image: redis:6.2-alpine
     restart: always
+    networks:
+      - default
 
   redis-socketio:
     image: redis:6.2-alpine
     restart: always
+    networks:
+      - default
 
   frappe:
     image: frappe/frappe:version-15
@@ -40,8 +48,8 @@ services:
     networks:
       default:
         aliases:
-          - backend
           - frappe
+          - backend
 
   site-creator:
     image: frappe/frappe:version-15
@@ -56,6 +64,8 @@ services:
       - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - default
 
   frontend:
     image: frappe/frappe:version-15
@@ -67,6 +77,8 @@ services:
       - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - default
 
   worker:
     image: frappe/frappe:version-15
@@ -76,6 +88,8 @@ services:
       - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - default
 
   scheduler:
     image: frappe/frappe:version-15
@@ -85,6 +99,8 @@ services:
       - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - default
 
   websocket:
     image: frappe/frappe:version-15
@@ -94,7 +110,13 @@ services:
       - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - default
 
 volumes:
   mariadb_data:
   sites:
+
+networks:
+  default:
+    name: erpnext-net
