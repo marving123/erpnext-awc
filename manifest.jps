@@ -2,8 +2,7 @@ type: install
 name: ERPNext via Docker Compose
 id: erpnext-docker
 logo: https://frappe.io/files/erp-icon.svg
-description: |
-  Deploy ERPNext using Docker Compose on Virtuozzo PaaS.
+description: Deploy ERPNext using Docker Compose on Virtuozzo PaaS.
 
 nodes:
   - nodeType: dockerengine
