@@ -2,8 +2,7 @@ type: install
 jpsVersion: '1.7.2'
 name: ERPNext via Docker Compose
 id: erpnext-docker
-logo: https://assets.erpnext.com/images/erpnext-logo.png
-description: Deploy ERPNext using Docker Compose on AWC PaaS.
+description: Deploy ERPNext using Docker Compose on Virtuozzo PaaS.
 
 nodes:
   - nodeType: dockerengine
@@ -15,4 +14,4 @@ nodes:
     env:
       JELASTIC_EXPOSE: 8080
     onInstall:
-      - cmd[cp]: bash -c "mkdir -p /root/erpnext && cd /root/erpnext && curl -O https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml && docker compose -f compose.yaml up -d"
+      - cmd[cp]: bash -c "mkdir -p /root/erpnext && cd /root/erpnext && curl -sS -o compose.yaml https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml && docker compose -f compose.yaml up -d"
