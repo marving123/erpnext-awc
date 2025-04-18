@@ -79,6 +79,8 @@ services:
       - sites:/home/frappe/frappe-bench/sites
     networks:
       - erpnext-net
+    extra_hosts:
+      - "frappe:127.0.0.1"
 
   worker:
     image: frappe/frappe:version-15
