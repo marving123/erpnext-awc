@@ -15,8 +15,4 @@ nodes:
     env:
       JELASTIC_EXPOSE: 8080
     onInstall:
-      # Split commands into separate steps to avoid YAML parsing issues
-      - cmd[cp]: mkdir -p /root/erpnext
-      - cmd[cp]: cd /root/erpnext
-      - cmd[cp]: curl -O https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml
-      - cmd[cp]: docker compose -f compose.yaml up -d
+      - cmd[cp]: bash -c "mkdir -p /root/erpnext && cd /root/erpnext && curl -O https://raw.githubusercontent.com/frappe/frappe_docker/main/compose.yaml && docker compose -f compose.yaml up -d"
