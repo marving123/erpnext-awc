@@ -1,8 +1,10 @@
 type: install
-jpsVersion: '1.7.2'
-name: ERPNext via Docker Compose
+version: 1.0
 id: erpnext-docker
-description: Deploy ERPNext using Docker Compose on Virtuozzo PaaS.
+name: ERPNext via Docker Compose
+description:
+  short: Deploy ERPNext using Docker Compose on Virtuozzo PaaS.
+  text: Installs ERPNext using Frappe’s official Docker Compose setup on a single Docker Engine node.
 
 nodes:
   - nodeType: dockerengine
