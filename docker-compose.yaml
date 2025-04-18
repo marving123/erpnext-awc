@@ -21,8 +21,8 @@ services:
     image: redis:6.2-alpine
     restart: always
 
-  backend:
-    image: frappe/erpnext:version-15
+  frappe:
+    image: frappe/frappe:version-15
     restart: always
     depends_on:
       - mariadb
@@ -37,9 +37,14 @@ services:
       INSTALL_APPS: erpnext
     volumes:
       - sites:/home/frappe/frappe-bench/sites
+    networks:
+      default:
+        aliases:
+          - backend
+          - frappe
 
   site-creator:
-    image: frappe/erpnext:version-15
+    image: frappe/frappe:version-15
     restart: "no"
     command: >
       bash -c "
@@ -48,45 +53,45 @@ services:
         echo 'site created'
       "
     depends_on:
-      - backend
+      - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
 
   frontend:
-    image: frappe/erpnext:version-15
+    image: frappe/frappe:version-15
     command: nginx-entrypoint.sh
     ports:
       - "80:8080"
     restart: always
     depends_on:
-      - backend
+      - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
 
   worker:
-    image: frappe/erpnext:version-15
+    image: frappe/frappe:version-15
     command: bench worker
     restart: always
     depends_on:
-      - backend
+      - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
 
   scheduler:
-    image: frappe/erpnext:version-15
+    image: frappe/frappe:version-15
     command: bench schedule
     restart: always
     depends_on:
-      - backend
+      - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
 
   websocket:
-    image: frappe/erpnext:version-15
+    image: frappe/frappe:version-15
     command: node /home/frappe/frappe-bench/apps/frappe/socketio.js
     restart: always
     depends_on:
-      - backend
+      - frappe
     volumes:
       - sites:/home/frappe/frappe-bench/sites
 
