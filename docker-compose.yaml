@@ -38,6 +38,20 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
 
+  site-creator:
+    image: frappe/erpnext:version-15
+    restart: "no"
+    command: >
+      bash -c "
+        bench new-site erp.mysite.local --admin-password admin --mariadb-root-password root &&
+        bench --site erp.mysite.local install-app erpnext &&
+        echo 'site created'
+      "
+    depends_on:
+      - backend
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
   frontend:
     image: frappe/erpnext:version-15
     command: nginx-entrypoint.sh
@@ -71,19 +85,6 @@ services:
     image: frappe/erpnext:version-15
     command: node /home/frappe/frappe-bench/apps/frappe/socketio.js
     restart: always
-    depends_on:
-      - backend
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-
-  site-creator:
-    image: frappe/erpnext:version-15
-    restart: "no"
-    command: >
-      bash -c "
-        bench new-site erp.mysite.local --admin-password admin --mariadb-root-password root &&
-        bench --site erp.mysite.local install-app erpnext
-      "
     depends_on:
       - backend
     volumes:
