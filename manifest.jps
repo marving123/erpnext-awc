@@ -2,7 +2,7 @@ type: install
 jpsVersion: '1.7.2'
 name: ERPNext via Docker Compose
 id: erpnext-docker
-logo: https://frappe.io/files/erp-icon.svg
+logo: https://assets.erpnext.com/images/erpnext-logo.png
 description: Deploy ERPNext using Docker Compose on AWC PaaS.
 
 nodes:
