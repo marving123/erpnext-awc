@@ -9,25 +9,25 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
-      - default
+      - erpnext-net
 
   redis-cache:
     image: redis:6.2-alpine
     restart: always
     networks:
-      - default
+      - erpnext-net
 
   redis-queue:
     image: redis:6.2-alpine
     restart: always
     networks:
-      - default
+      - erpnext-net
 
   redis-socketio:
     image: redis:6.2-alpine
     restart: always
     networks:
-      - default
+      - erpnext-net
 
   frappe:
     image: frappe/frappe:version-15
@@ -46,7 +46,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
-      default:
+      erpnext-net:
         aliases:
           - frappe
           - backend
@@ -65,7 +65,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
-      - default
+      - erpnext-net
 
   frontend:
     image: frappe/frappe:version-15
@@ -78,7 +78,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
-      - default
+      - erpnext-net
 
   worker:
     image: frappe/frappe:version-15
@@ -89,7 +89,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
-      - default
+      - erpnext-net
 
   scheduler:
     image: frappe/frappe:version-15
@@ -100,7 +100,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
-      - default
+      - erpnext-net
 
   websocket:
     image: frappe/frappe:version-15
@@ -111,12 +111,12 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
-      - default
+      - erpnext-net
 
 volumes:
   mariadb_data:
   sites:
 
 networks:
-  default:
-    name: erpnext-net
+  erpnext-net:
+    driver: bridge
