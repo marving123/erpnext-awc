@@ -1,67 +1,54 @@
-version: '3.7'
+version: "3.7"
 
 services:
-  mariadb:
+  db:
     image: mariadb:10.6
-    restart: always
+    container_name: erpnext-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: admin
     volumes:
-      - mariadb_data:/var/lib/mysql
-
-  redis-cache:
-    image: redis:6.2-alpine
-    restart: always
-
-  redis-queue:
-    image: redis:6.2-alpine
-    restart: always
-
-  redis-socketio:
-    image: redis:6.2-alpine
-    restart: always
+      - db_data:/var/lib/mysql
+    networks:
+      - erpnet
 
   backend:
-    image: frappe/frappe:version-15
-    restart: always
+    image: frappe/erpnext:v15.58.2
+    container_name: erpnext-backend
     depends_on:
-      - mariadb
-      - redis-cache
-      - redis-queue
-      - redis-socketio
+      - db
     environment:
-      SITE_NAME: erp.mysite.local
-      DB_ROOT_USER: root
-      MYSQL_ROOT_PASSWORD: root
+      SITE_NAME: site1.local
+      DB_ROOT_PASSWORD: admin
       ADMIN_PASSWORD: admin
       INSTALL_APPS: erpnext
     volumes:
       - sites:/home/frappe/frappe-bench/sites
-
-  site-creator:
-    image: frappe/frappe:version-15
-    restart: "no"
-    depends_on:
-      - backend
-    command: >
+    entrypoint: >
       bash -c "
-        bench new-site erp.mysite.local --admin-password admin --mariadb-root-password root &&
-        bench --site erp.mysite.local install-app erpnext &&
-        echo 'site created'
-      "
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
+        if [ ! -f /home/frappe/frappe-bench/sites/site1.local/site_config.json ]; then
+          bench new-site $SITE_NAME \
+            --admin-password $ADMIN_PASSWORD \
+            --db-root-password $DB_ROOT_PASSWORD && \
+          bench --site $SITE_NAME install-app $INSTALL_APPS;
+        fi &&
+        bench start"
+    networks:
+      - erpnet
 
-  nginx:
-    image: nginx:1.22-alpine
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  frontend:
+    image: frappe/erpnext:v15.58.2
+    container_name: erpnext-frontend
     depends_on:
       - backend
+    ports:
+      - "8080:8080"
+    networks:
+      - erpnet
 
 volumes:
-  mariadb_data:
+  db_data:
   sites:
+
+networks:
+  erpnet:
+    driver: bridge
