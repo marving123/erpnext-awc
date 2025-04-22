@@ -44,15 +44,15 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     entrypoint: >
-  bash -c "
-    if [ ! -f /home/frappe/frappe-bench/sites/site1.local/site_config.json ]; then
-      bench new-site site1.local \
-        --admin-password admin \
-        --db-root-password admin \
-        --db-host db && \
-      bench --site site1.local install-app erpnext;
-    fi &&
-    bench start"
+      bash -c "
+        if [ ! -f /home/frappe/frappe-bench/sites/site1.local/site_config.json ]; then
+          bench new-site site1.local \
+            --admin-password admin \
+            --db-root-password admin \
+            --db-host db && \
+          bench --site site1.local install-app erpnext;
+        fi &&
+        bench serve --port 8000 --site site1.local --noreload"
     networks:
       - erpnet
 
