@@ -29,7 +29,7 @@ services:
     networks:
       - erpnet
 
-   backend:
+  backend:
     image: frappe/erpnext:v15.58.2
     container_name: erpnext-backend
     depends_on:
@@ -48,15 +48,36 @@ services:
       bash -c '
         export PATH=$PATH:/home/frappe/.local/bin;
         cd /home/frappe/frappe-bench;
+
+        # Ensure Procfile exists
+        if [ ! -f Procfile ]; then
+          echo "Creating Procfile...";
+          cat <<EOF > Procfile
+web: bench serve --port 8000
+worker: bench worker
+schedule: bench schedule
+EOF
+        fi;
+
+        # Wait for the database to be ready
+        until mysqladmin ping -h db --silent; do
+          echo "Waiting for database to be ready...";
+          sleep 5;
+        done;
+
+        # Create the site if it doesn't exist
         if [ ! -f sites/site1.local/site_config.json ]; then
           bench new-site site1.local \
             --admin-password admin \
             --mariadb-root-password admin \
             --db-host db \
+            --no-mariadb-socket \
             --no-input &&
           bench --site site1.local install-app erpnext;
         fi;
-        exec /home/frappe/entrypoint.sh
+
+        # Start the application
+        bench start
       '
     networks:
       - erpnet
@@ -67,7 +88,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "8080:8080"
+      - "8080:8000"
     volumes:
       - sites:/home/frappe/frappe-bench/sites
     networks:
