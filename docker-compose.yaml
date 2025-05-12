@@ -51,12 +51,9 @@ services:
 
         # Ensure Procfile exists
         if [ ! -f Procfile ]; then
-          echo "Creating Procfile...";
-          cat <<EOF > Procfile
-web: bench serve --port 8000
-worker: bench worker
-schedule: bench schedule
-EOF
+          echo "web: bench serve --port 8000" > Procfile;
+          echo "worker: bench worker" >> Procfile;
+          echo "schedule: bench schedule" >> Procfile;
         fi;
 
         # Wait for the database to be ready
@@ -65,7 +62,7 @@ EOF
           sleep 5;
         done;
 
-        # Create the site if it doesn't exist
+        # Create the site if it does not exist
         if [ ! -f sites/site1.local/site_config.json ]; then
           bench new-site site1.local \
             --admin-password admin \
